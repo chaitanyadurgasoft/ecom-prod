@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛍️ Simple Shop - Beautiful E-Commerce</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .btn-cart {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            position: relative;
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ff4444;
+            color: white;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+
+        /* Products Grid */
+        .products-section {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .product-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .product-info {
+            padding: 20px;
+        }
+
+        .product-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .product-description {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .product-price {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .product-stock {
+            font-size: 0.9rem;
+            color: #38ef7d;
+            margin-bottom: 15px;
+        }
+
+        /* Cart */
+        .cart-section {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: none;
+        }
+
+        .cart-section.active {
+            display: block;
+        }
+
+        .cart-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 2px solid #f0f0f0;
+            gap: 20px;
+        }
+
+        .cart-item-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .cart-item-info {
+            flex: 1;
+        }
+
+        .cart-item-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .cart-item-price {
+            color: #667eea;
+            font-size: 1.1rem;
+        }
+
+        .quantity-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .quantity-btn {
+            width: 35px;
+            height: 35px;
+            border: none;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .cart-total {
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 3px solid #667eea;
+            text-align: right;
+        }
+
+        .total-amount {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .modal-title {
+            font-size: 2rem;
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .header h1 {
+                margin-bottom: 20px;
+            }
+
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🛍️ Simple Shop</h1>
+            <div class="header-buttons" id="headerButtons">
+                <button class="btn btn-primary" onclick="showLogin()">Login</button>
+                <button class="btn btn-cart" onclick="toggleCart()">
+                    🛒 Cart
+                    <span class="cart-badge" id="cartBadge">0</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Products Section -->
+        <div class="products-section" id="productsSection">
+            <h2 class="section-title">✨ Featured Products</h2>
+            <div class="products-grid" id="productsGrid"></div>
+        </div>
+
+        <!-- Cart Section -->
+        <div class="cart-section" id="cartSection">
+            <h2 class="section-title">🛒 Your Shopping Cart</h2>
+            <div id="cartItems"></div>
+            <div class="cart-total">
+                <div class="total-amount">Total: $<span id="cartTotal">0.00</span></div>
+                <button class="btn btn-success" style="font-size: 1.2rem; padding: 15px 50px;" onclick="checkout()">
+                    🎉 Checkout
+                </button>
+            </div>
+        </div>
+
+        <!-- Login Modal -->
+        <div class="modal" id="loginModal">
+            <div class="modal-content">
+                <h2 class="modal-title">🔐 Login / Register</h2>
+                <div id="loginMessage"></div>
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" id="userName" placeholder="Enter your name">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="userEmail" placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="userPassword" placeholder="Enter password">
+                </div>
+                <button class="btn btn-primary" style="width: 100%; margin-bottom: 10px;" onclick="login()">Login</button>
+                <button class="btn btn-success" style="width: 100%;" onclick="register()">Register</button>
+                <button class="btn" style="width: 100%; margin-top: 10px; background: #ddd;" onclick="closeLogin()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API URLs
+        const PRODUCT_API = 'http://localhost:8081/api/products';
+        const ORDER_API = 'http://localhost:8082/api/orders';
+        const USER_API = 'http://localhost:8083/api/users';
+
+        // State
+        let products = [];
+        let cart = [];
+        let currentUser = null;
+
+        // Load products on page load
+        window.onload = () => {
+            loadProducts();
+        };
+
+        // Load products from backend
+        async function loadProducts() {
+            try {
+                const response = await fetch(PRODUCT_API);
+                products = await response.json();
+                displayProducts();
+            } catch (error) {
+                console.error('Error loading products:', error);
+                alert('⚠️ Could not load products. Make sure Product Service is running on port 8081');
+            }
+        }
+
+        // Display products
+        function displayProducts() {
+            const grid = document.getElementById('productsGrid');
+            grid.innerHTML = products.map(product => `
+                <div class="product-card" onclick="addToCart(${product.id})">
+                    <img src="${product.imageUrl}" alt="${product.name}" class="product-image">
+                    <div class="product-info">
+                        <div class="product-name">${product.name}</div>
+                        <div class="product-description">${product.description}</div>
+                        <div class="product-price">$${product.price.toFixed(2)}</div>
+                        <div class="product-stock">✅ ${product.stock} in stock</div>
+                        <button class="btn btn-primary" style="width: 100%;">Add to Cart</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Add to cart
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            const cartItem = cart.find(item => item.id === productId);
+
+            if (cartItem) {
+                cartItem.quantity++;
+            } else {
+                cart.push({ ...product, quantity: 1 });
+            }
+
+            updateCart();
+            alert(`✅ ${product.name} added to cart!`);
+        }
+
+        // Update cart display
+        function updateCart() {
+            const cartBadge = document.getElementById('cartBadge');
+            const cartItems = document.getElementById('cartItems');
+            const cartTotal = document.getElementById('cartTotal');
+
+            cartBadge.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<p style="text-align: center; padding: 40px; color: #999;">Your cart is empty</p>';
+                cartTotal.textContent = '0.00';
+                return;
+            }
+
+            cartItems.innerHTML = cart.map(item => `
+                <div class="cart-item">
+                    <img src="${item.imageUrl}" class="cart-item-image">
+                    <div class="cart-item-info">
+                        <div class="cart-item-name">${item.name}</div>
+                        <div class="cart-item-price">$${item.price.toFixed(2)}</div>
+                    </div>
+                    <div class="quantity-controls">
+                        <button class="quantity-btn" onclick="changeQuantity(${item.id}, -1)">−</button>
+                        <span style="font-size: 1.2rem; font-weight: bold;">${item.quantity}</span>
+                        <button class="quantity-btn" onclick="changeQuantity(${item.id}, 1)">+</button>
+                    </div>
+                    <button class="btn" style="background: #ff4444; color: white;" onclick="removeFromCart(${item.id})">Remove</button>
+                </div>
+            `).join('');
+
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            cartTotal.textContent = total.toFixed(2);
+        }
+
+        // Change quantity
+        function changeQuantity(productId, change) {
+            const cartItem = cart.find(item => item.id === productId);
+            if (cartItem) {
+                cartItem.quantity += change;
+                if (cartItem.quantity <= 0) {
+                    removeFromCart(productId);
+                } else {
+                    updateCart();
+                }
+            }
+        }
+
+        // Remove from cart
+        function removeFromCart(productId) {
+            cart = cart.filter(item => item.id !== productId);
+            updateCart();
+        }
+
+        // Toggle cart
+        function toggleCart() {
+            const productsSection = document.getElementById('productsSection');
+            const cartSection = document.getElementById('cartSection');
+            
+            if (cartSection.classList.contains('active')) {
+                cartSection.classList.remove('active');
+                productsSection.style.display = 'block';
+            } else {
+                productsSection.style.display = 'none';
+                cartSection.classList.add('active');
+                updateCart();
+            }
+        }
+
+        // Show login modal
+        function showLogin() {
+            document.getElementById('loginModal').classList.add('active');
+        }
+
+        // Close login modal
+        function closeLogin() {
+            document.getElementById('loginModal').classList.remove('active');
+        }
+
+        // Register
+        async function register() {
+            const name = document.getElementById('userName').value;
+            const email = document.getElementById('userEmail').value;
+            const password = document.getElementById('userPassword').value;
+            const messageDiv = document.getElementById('loginMessage');
+
+            if (!name || !email || !password) {
+                messageDiv.innerHTML = '<div class="message error">Please fill all fields</div>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${USER_API}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password })
+                });
+
+                const user = await response.json();
+                if (user && user.id) {
+                    currentUser = user;
+                    messageDiv.innerHTML = '<div class="message success">✅ Registration successful!</div>';
+                    setTimeout(() => {
+                        closeLogin();
+                        updateHeader();
+                    }, 1500);
+                } else {
+                    messageDiv.innerHTML = '<div class="message error">❌ Email already exists</div>';
+                }
+            } catch (error) {
+                messageDiv.innerHTML = '<div class="message error">⚠️ User Service not available</div>';
+            }
+        }
+
+        // Login
+        async function login() {
+            const email = document.getElementById('userEmail').value;
+            const password = document.getElementById('userPassword').value;
+            const messageDiv = document.getElementById('loginMessage');
+
+            if (!email || !password) {
+                messageDiv.innerHTML = '<div class="message error">Please enter email and password</div>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${USER_API}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const user = await response.json();
+                if (user && user.id) {
+                    currentUser = user;
+                    messageDiv.innerHTML = '<div class="message success">✅ Login successful!</div>';
+                    setTimeout(() => {
+                        closeLogin();
+                        updateHeader();
+                    }, 1500);
+                } else {
+                    messageDiv.innerHTML = '<div class="message error">❌ Invalid credentials</div>';
+                }
+            } catch (error) {
+                messageDiv.innerHTML = '<div class="message error">⚠️ User Service not available</div>';
+            }
+        }
+
+        // Update header when logged in
+        function updateHeader() {
+            const headerButtons = document.getElementById('headerButtons');
+            if (currentUser) {
+                headerButtons.innerHTML = `
+                    <span style="font-size: 1.2rem; font-weight: bold; color: #667eea;">
+                        👤 ${currentUser.name}
+                    </span>
+                    <button class="btn btn-cart" onclick="toggleCart()">
+                        🛒 Cart
+                        <span class="cart-badge" id="cartBadge">${cart.reduce((s, i) => s + i.quantity, 0)}</span>
+                    </button>
+                `;
+            }
+        }
+
+        // Checkout
+        async function checkout() {
+            if (!currentUser) {
+                alert('⚠️ Please login first!');
+                showLogin();
+                return;
+            }
+
+            if (cart.length === 0) {
+                alert('⚠️ Your cart is empty!');
+                return;
+            }
+
+            const orderData = {
+                userId: currentUser.id,
+                items: cart.map(item => ({
+                    productId: item.id,
+                    productName: item.name,
+                    quantity: item.quantity,
+                    price: item.price
+                })),
+                total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+            };
+
+            try {
+                const response = await fetch(ORDER_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(orderData)
+                });
+
+                const order = await response.json();
+                if (order && order.id) {
+                    alert(`🎉 Order placed successfully!\nOrder ID: #${order.id}\nTotal: $${order.total.toFixed(2)}\n\nThank you for shopping with us!`);
+                    cart = [];
+                    updateCart();
+                    toggleCart();
+                }
+            } catch (error) {
+                alert('⚠️ Order Service not available. Please try again later.');
+            }
+        }
+    </script>
+</body>
+</html>
