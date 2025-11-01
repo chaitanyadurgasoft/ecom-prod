@@ -384,10 +384,11 @@
     </div>
 
     <script>
-        // API URLs
-        const PRODUCT_API = 'http://localhost:8081/api/products';
-        const ORDER_API = 'http://localhost:8082/api/orders';
-        const USER_API = 'http://localhost:8083/api/users';
+        // API URLs - All requests go through API Gateway on port 8080
+        const API_BASE = '/api';  // Nginx will proxy this to API Gateway
+        const PRODUCT_API = `${API_BASE}/products`;
+        const ORDER_API = `${API_BASE}/orders`;
+        const USER_API = `${API_BASE}/users`;
 
         // State
         let products = [];
@@ -407,7 +408,7 @@
                 displayProducts();
             } catch (error) {
                 console.error('Error loading products:', error);
-                alert('⚠️ Could not load products. Make sure Product Service is running on port 8081');
+                alert('⚠️ Could not load products. Make sure all services are running.');
             }
         }
 

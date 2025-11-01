@@ -1,0 +1,141 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: shopdb
+      POSTGRES_USER: shopuser
+      POSTGRES_PASSWORD: shoppass123
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - shop-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shopuser -d shopdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # API Gateway - Single entry point for frontend
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    networks:
+      - shop-network
+    depends_on:
+      - product-service
+      - order-service
+      - user-service
+      - notification-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    restart: unless-stopped
+
+  # Product Service
+  product-service:
+    build:
+      context: ./product-service
+      dockerfile: Dockerfile
+    container_name: product-service
+    expose:
+      - "8081"
+    networks:
+      - shop-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    restart: unless-stopped
+
+  # Order Service (Now with Database)
+  order-service:
+    build:
+      context: ./order-service
+      dockerfile: Dockerfile
+    container_name: order-service
+    expose:
+      - "8082"
+    networks:
+      - shop-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      notification-service:
+        condition: service_started
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - DB_HOST=postgres-db
+      - DB_PORT=5432
+      - DB_NAME=shopdb
+      - DB_USER=shopuser
+      - DB_PASSWORD=shoppass123
+    restart: unless-stopped
+
+  # User Service (Now with Database)
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    container_name: user-service
+    expose:
+      - "8083"
+    networks:
+      - shop-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - DB_HOST=postgres-db
+      - DB_PORT=5432
+      - DB_NAME=shopdb
+      - DB_USER=shopuser
+      - DB_PASSWORD=shoppass123
+    restart: unless-stopped
+
+  # Notification Service
+  notification-service:
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile
+    container_name: notification-service
+    expose:
+      - "8084"
+    networks:
+      - shop-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    restart: unless-stopped
+
+  # Frontend (Nginx to serve HTML)
+  frontend:
+    image: nginx:alpine
+    container_name: frontend
+    ports:
+      - "3000:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - shop-network
+    depends_on:
+      - api-gateway
+    restart: unless-stopped
+
+# Network for all services to communicate
+networks:
+  shop-network:
+    driver: bridge
+
+# Volume for PostgreSQL data persistence
+volumes:
+  postgres-data:
+    driver: local

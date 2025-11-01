@@ -1,7 +1,7 @@
 package com.shop.user;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -9,18 +9,14 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 public class UserController {
     
-    private List<User> users = new ArrayList<>();
-    
-    // Constructor - add demo user
-    public UserController() {
-        users.add(new User(1L, "John Doe", "john@example.com", "password123"));
-    }
+    @Autowired
+    private UserRepository userRepository;
     
     // GET all users
     @GetMapping
     public List<User> getAllUsers() {
-        System.out.println("👥 Getting all users");
-        // Don't send passwords!
+        System.out.println("👥 Getting all users from database");
+        List<User> users = userRepository.findAll();
         users.forEach(u -> u.setPassword("***"));
         return users;
     }
@@ -28,38 +24,27 @@ public class UserController {
     // POST - Register new user
     @PostMapping("/register")
     public User register(@RequestBody User user) {
-        // Check if email already exists
-        boolean exists = users.stream()
-            .anyMatch(u -> u.getEmail().equals(user.getEmail()));
-            
-        if (exists) {
+        if (userRepository.existsByEmail(user.getEmail())) {
             System.out.println("❌ Email already exists: " + user.getEmail());
             return null;
         }
         
-        user.setId((long) (users.size() + 1));
-        users.add(user);
-        System.out.println("✅ User registered: " + user.getName());
+        User savedUser = userRepository.save(user);
+        System.out.println("✅ User registered in database: " + savedUser.getName());
         
-        // Don't send password back
-        user.setPassword(null);
-        return user;
+        savedUser.setPassword(null);
+        return savedUser;
     }
     
     // POST - Login
     @PostMapping("/login")
     public User login(@RequestBody LoginRequest request) {
-        System.out.println("🔐 Login attempt: " + request.getEmail());
+        System.out.println("🔐 Login attempt from database: " + request.getEmail());
         
-        User user = users.stream()
-            .filter(u -> u.getEmail().equals(request.getEmail()) 
-                      && u.getPassword().equals(request.getPassword()))
-            .findFirst()
-            .orElse(null);
-            
-        if (user != null) {
+        User user = userRepository.findByEmail(request.getEmail()).orElse(null);
+        
+        if (user != null && user.getPassword().equals(request.getPassword())) {
             System.out.println("✅ Login successful: " + user.getName());
-            // Don't send password
             user.setPassword(null);
             return user;
         } else {
@@ -71,11 +56,10 @@ public class UserController {
     // Health check
     @GetMapping("/health")
     public String health() {
-        return "✅ User Service is running!";
+        return "✅ User Service is running with Database!";
     }
 }
 
-// Simple login request class
 class LoginRequest {
     private String email;
     private String password;
